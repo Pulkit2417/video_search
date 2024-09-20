@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video List</title>
+</head>
+<body>
+    <h1>Uploaded Videos</h1>
+    <ul>
+        {% for video in videos %}
+            <li>
+                <a href="{% url 'video_play' video.id %}">{{ video.title }}</a>
+            </li>
+        {% empty %}
+            <li>No videos found.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

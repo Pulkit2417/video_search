@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results for "{{ request.GET.q }}"</h1>
+    {% load custom_filters %}
+    {% if results %}
+        {% for result in results %}
+            <div>
+                <p>{{ result.phrase }}</p>
+                <a href="{% url 'video_play' video.id %}?t={{ result.start_time|floatformat:3 }}">Jump to {{ result.start_time }}</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No results found for "{{ request.GET.q }}"</p>
+    {% endif %}
+
+    <video id="videoPlayer" controls preload="metadata">
+        <source src="{{ video.file.url }}" type="video/mp4">
+        <!-- Subtitle tracks -->
+        {% for subtitle in subtitles %}
+        <track label="{{ subtitle.language }}" kind="subtitles" srclang="{{ subtitle.language_code }}" src="{{ subtitle.file.url }}" default="{% if forloop.first %}true{% endif %}">
+        {% endfor %}
+    </video>
+
+    <div id="subtitleDisplay"></div>
+
+    <script>
+        // Ensure subtitles is correctly formatted as JSON
+        const subtitles = JSON.parse('{{ subtitles|escapejs }}');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const subtitleDisplay = document.getElementById('subtitleDisplay');
+
+        videoPlayer.ontimeupdate = function() {
+            const currentTime = videoPlayer.currentTime;
+            subtitleDisplay.innerText = '';
+
+            subtitles.forEach(sub => {
+                if (currentTime >= sub.start_time && currentTime <= sub.end_time) {
+                    subtitleDisplay.innerText = sub.phrase;
+                }
+            });
+        };
+    </script>
+</body>
+</html>

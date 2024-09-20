@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ video.title }}</title>
+</head>
+<body>
+    <h1>{{ video.title }}</h1>
+
+    <!-- Search Form -->
+    <form action="{% url 'search_subtitles' video.id %}" method="get">
+        <input type="text" name="q" placeholder="Search subtitles" value="{{ request.GET.q }}">
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Video Player -->
+    <video id="videoPlayer" controls>
+        <source src="{{ video.file.url }}" type="video/mp4">
+        <!-- Subtitle tracks -->
+        {% for subtitle in subtitles %}
+        <track label="{{ subtitle.language }}" kind="subtitles" srclang="{{ subtitle.language_code }}" src="{{ subtitle.file.url }}" default="{% if forloop.first %}true{% endif %}">
+        {% endfor %}
+    </video>
+    
+    <div id="subtitleDisplay"></div>
+    
+    <script>
+        // Function to get the query parameter value by name
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+    
+        const videoPlayer = document.getElementById('videoPlayer');
+        const startTime = getQueryParam('t'); // Get the start time from the query parameter
+    
+        // Ensure startTime is not 'None' or an invalid value
+        if (startTime && !isNaN(parseFloat(startTime))) {
+            videoPlayer.currentTime = parseFloat(startTime);
+        }
+    
+        // Set the currentTime after the video metadata is loaded
+        videoPlayer.addEventListener('loadedmetadata', function() {
+            if (startTime && !isNaN(parseFloat(startTime))) {
+                videoPlayer.currentTime = parseFloat(startTime);
+            }
+        });
+    </script>
+    
+    
+</body>
+</html>
